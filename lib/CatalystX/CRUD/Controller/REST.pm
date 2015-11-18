@@ -8,7 +8,7 @@ BEGIN {
     extends qw( Catalyst::Controller::REST CatalystX::CRUD );
 }
 
-our $VERSION = '0.004';
+our $VERSION = '0.005';
 
 __PACKAGE__->mk_accessors(
     qw(
@@ -343,12 +343,21 @@ sub two_args_POST {
         return;
     }
 
-    $self->throw_error('TODO');
+    if ( !$self->model_can( $c, 'create_related' ) ) {
+        $self->status_bad_request( $c,
+            message =>
+                'This server does not yet implement the required method create_related'
+        );
+        return;
+    }
 
     my $rel_obj
         = $self->do_model( $c, 'create_related', $c->stash->{object}, $rel, );
     if ($rel_obj) {
-        my $rel_id = $self->make_primary_key_string($rel_obj);
+
+        # this controller doesn't know anything about the PK for $rel,
+        # so assume the object can give us a PK.
+        my $rel_id = $rel_obj->primary_key_uri_escaped;
         $self->status_created(
             $c,
             location =>
@@ -359,7 +368,7 @@ sub two_args_POST {
     else {
 
         # TODO msg
-        $self->status_bad_request( $c, message => 'Failed to delete' );
+        $self->status_bad_request( $c, message => 'Failed to create' );
     }
 
 }
@@ -386,9 +395,8 @@ GET /foo/<pk>/<re>/<pk2>
 sub three_args_GET {
     my ( $self, $c, $id, $rel, $rel_id ) = @_;
     return if $c->stash->{fetch_failed};
-    my $result
-        = $self->do_model( $c, 'find_related', $c->stash->{object}, $rel,
-        $rel_id, );
+    my $result = $self->do_model( $c, 'find_related', $c->stash->{object},
+        $rel, $rel_id, );
     if ( !$result or ( ref $result eq 'ARRAY' and !@$result ) ) {
         my $err_msg = sprintf( "No such %s with id '%s'", $rel, $rel_id );
         $self->status_not_found( $c, message => $err_msg );
@@ -422,8 +430,8 @@ sub three_args_DELETE {
         return;
     }
 
-    my $rt = $self->do_model( $c, 'rm_related', $c->stash->{object}, $rel,
-        $rel_id, );
+    my $rt = $self->do_model( $c, 'rm_related', $c->stash->{object},
+        $rel, $rel_id, );
     if ($rt) {
         $self->status_no_content($c);
     }
@@ -444,8 +452,8 @@ POST /foo/<pk>/bar/<pk2> -> create relationship between 'foo' and 'bar'
 sub three_args_POST {
     my ( $self, $c, $id, $rel, $rel_id ) = @_;
     return if $c->stash->{fetch_failed};
-    my $rt = $self->do_model( $c, 'add_related', $c->stash->{object}, $rel,
-        $rel_id, );
+    my $rt = $self->do_model( $c, 'add_related', $c->stash->{object},
+        $rel, $rel_id, );
     if ($rt) {
         $self->status_no_content($c);
     }
@@ -466,8 +474,8 @@ PUT /foo/<pk>/bar/<pk2> -> create/update 'bar' object related to 'foo'
 sub three_args_PUT {
     my ( $self, $c, $id, $rel, $rel_id ) = @_;
     return if $c->stash->{fetch_failed};
-    my $rt = $self->do_model( $c, 'put_related', $c->stash->{object}, $rel,
-        $rel_id, );
+    my $rt = $self->do_model( $c, 'put_related', $c->stash->{object},
+        $rel, $rel_id, );
 
     if ($rt) {
         $self->status_no_content($c);

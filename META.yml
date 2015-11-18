@@ -8,7 +8,7 @@ configure_requires:
   ExtUtils::MakeMaker: 6.59
 distribution_type: module
 dynamic_config: 1
-generated_by: 'Module::Install version 1.08'
+generated_by: 'Module::Install version 1.16'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -28,7 +28,7 @@ requires:
   perl: 5.8.3
 resources:
   bugtracker: http://rt.cpan.org/NoAuth/Bugs.html?Dist=CatalystX-CRUD-Controller-REST
-  homepage: http://dev.catalyst.perl.org/repos/Catalyst/CatalystX-CRUD/CatalystX-CRUD-Controller-REST
+  homepage: https://github.com/karpet/catalystx-crud-controller-rest
   license: http://dev.perl.org/licenses/
-  repository: http://dev.catalyst.perl.org/repos/Catalyst/CatalystX-CRUD/CatalystX-CRUD-Controller-REST
-version: '0.004'
+  repository: https://github.com/karpet/catalystx-crud-controller-rest.git
+version: '0.005'
